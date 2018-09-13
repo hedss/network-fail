@@ -1,0 +1,34 @@
+version: "2"
+volumes:
+    db-data:
+    redis-data:
+services:
+  db:
+    image: resin/open-balena-db:v1.1.2
+    #build: ./db
+    volumes:
+        - db-data:/var/lib/postgresql/data
+  haproxy:
+    build: ./haproxy
+    depends_on:
+        - redis
+        - db
+    networks:
+      default:
+        aliases:
+        - redis.mc-resindev.io
+        - db.mc-resindev.io
+    ports:
+        - "80:80"
+        - "222:222"
+        - "443:443"
+        - "2222:2222"
+        - "5432:5432"
+        - "6379:6379"
+  redis:
+    image: redis:alpine
+    cap_add:
+        - SYS_RESOURCE
+        - SYS_ADMIN
+    volumes:
+        - redis-data:/data
